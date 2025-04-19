@@ -3,8 +3,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <meta http-equiv="Content-Security-Policy" content="frame-ancestors *;">
   <title>Cart Orders</title>
   <style>
     body {
@@ -45,17 +43,6 @@
     #whatsapp:hover {
       background-color: #1ebc57;
     }
-    .delete-btn {
-      background-color: #e74c3c;
-      color: white;
-      border: none;
-      padding: 5px 10px;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    .delete-btn:hover {
-      background-color: #c0392b;
-    }
   </style>
 </head>
 <body>
@@ -65,7 +52,6 @@
       <tr>
         <th>Meal</th>
         <th>Price</th>
-        <th>Action</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -73,49 +59,55 @@
   <h2 style="text-align:center">Total: <span id="total">0</span> USD</h2>
   <button id="whatsapp">Send Order to WhatsApp</button>
 
-  <script>
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+    import { getDatabase, ref, onValue } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-database.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAd9vrB6xIWL2Hh7Cv4rByIJC_YtJCg7lw",
+      authDomain: "cart-project-8225f.firebaseapp.com",
+      databaseURL: "https://cart-project-8225f-default-rtdb.firebaseio.com",
+      projectId: "cart-project-8225f",
+      storageBucket: "cart-project-8225f.firebasestorage.app",
+      messagingSenderId: "78661243362",
+      appId: "1:78661243362:web:d15469dee230ff664f69bb",
+      measurementId: "G-MX7V6EJ0ZE"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getDatabase(app);
+
     const tableBody = document.querySelector("#order-table tbody");
     const totalElement = document.getElementById("total");
     const phoneNumber = "971563072259";
 
-    function updateCartDisplay() {
+    let total = 0;
+    onValue(ref(db, "cart"), (snapshot) => {
       tableBody.innerHTML = "";
-      let total = 0;
-      cart.forEach((item, index) => {
+      total = 0;
+
+      snapshot.forEach((childSnapshot) => {
+        const item = childSnapshot.val();
         const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${item.name}</td>
-          <td>$${item.price}</td>
-          <td><button class="delete-btn" data-index="${index}">Delete</button></td>
-        `;
+        row.innerHTML = `<td>${item.name}</td><td>$${item.price}</td>`;
         tableBody.appendChild(row);
         total += parseFloat(item.price);
       });
-      totalElement.textContent = total.toFixed(2);
-    }
 
-    tableBody.addEventListener("click", function(e) {
-      if (e.target.classList.contains("delete-btn")) {
-        const index = e.target.getAttribute("data-index");
-        cart.splice(index, 1);
-        localStorage.setItem("cart", JSON.stringify(cart));
-        updateCartDisplay();
-      }
+      totalElement.textContent = total.toFixed(2);
     });
 
     document.getElementById("whatsapp").addEventListener("click", () => {
       let message = "Hello, I would like to order the following meals:%0A";
-      let total = 0;
-      cart.forEach(item => {
-        message += `🍔 ${item.name} - $${item.price}%0A`;
-        total += parseFloat(item.price);
+      const rows = document.querySelectorAll("#order-table tbody tr");
+      rows.forEach(row => {
+        const name = row.children[0].textContent;
+        const price = row.children[1].textContent;
+        message += `🍔 ${name} - ${price}%0A`;
       });
       message += `%0ATotal: $${total.toFixed(2)}`;
       window.open(`https://wa.me/${phoneNumber}?text=${message}`);
     });
-
-    updateCartDisplay();
   </script>
 </body>
 </html>
