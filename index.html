@@ -77,12 +77,19 @@
     const app = initializeApp(firebaseConfig);
     const db = getDatabase(app);
 
+    // نأخذ معرف المستخدم من الـ localStorage
+    let userID = localStorage.getItem("userID");
+    if (!userID) {
+      userID = Math.random().toString(36).substring(2);
+      localStorage.setItem("userID", userID);
+    }
+
     const tableBody = document.querySelector("#order-table tbody");
     const totalElement = document.getElementById("total");
     const phoneNumber = "971563072259";
 
     let total = 0;
-    onValue(ref(db, "cart"), (snapshot) => {
+    onValue(ref(db, `cart/${userID}`), (snapshot) => { // نعرض طلبات المستخدم فقط
       tableBody.innerHTML = "";
       total = 0;
 
