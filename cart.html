@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta http-equiv="Content-Security-Policy" content="frame-ancestors *;">
+<title>Cart Orders</title>
+<style>
+    body {
+    font-family: 'Arial', sans-serif;
+    background-color: #111;
+    color: #fff;
+    margin: 0;
+    padding: 20px;
+    }
+    h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    }
+    table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    }
+    table, th, td {
+    border: 1px solid #444;
+    }
+    th, td {
+    padding: 10px;
+    text-align: center;
+    }
+    #whatsapp {
+    background-color: #25D366;
+    color: white;
+    padding: 15px 25px;
+    font-size: 16px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: block;
+    margin: 0 auto;
+    transition: background 0.3s;
+    }
+    #whatsapp:hover {
+    background-color: #1ebc57;
+    }
+</style>
+</head>
+<body>
+<h1>🛒 Cart Orders</h1>
+<table id="order-table">
+    <thead>
+    <tr>
+        <th>Meal</th>
+        <th>Price</th>
+    </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+<h2 style="text-align:center">Total: <span id="total">0</span> USD</h2>
+<button id="whatsapp">Send Order to WhatsApp</button>
+
+<script>
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
+    const tableBody = document.querySelector("#order-table tbody");
+    const totalElement = document.getElementById("total");
+    const phoneNumber = "971563072259";
+
+    let total = 0;
+    cart.forEach(item => {
+    const row = document.createElement("tr");
+    row.innerHTML = `<td>${item.name}</td><td>$${item.price}</td>`;
+    tableBody.appendChild(row);
+    total += parseFloat(item.price);
+    });
+
+    totalElement.textContent = total.toFixed(2);
+
+    document.getElementById("whatsapp").addEventListener("click", () => {
+    let message = "Hello, I would like to order the following meals:%0A";
+    cart.forEach(item => {
+        message += `🍔 ${item.name} - $${item.price}%0A`;
+    });
+    message += `%0ATotal: $${total.toFixed(2)}`;
+    window.open(`https://wa.me/${phoneNumber}?text=${message}`);
+    });
+</script>
+</body>
+</html>
